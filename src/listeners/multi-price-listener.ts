@@ -70,7 +70,6 @@ export class MultiPriceListener {
 		};
 
 		MultiPriceListener.binanceWsConnection?.SendData(data);
-
 	}
 
 	private static IncrementSubscriptionCount = (symbolPriceData: SymbolPriceData): SymbolPriceData => {
