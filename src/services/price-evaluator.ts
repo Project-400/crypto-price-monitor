@@ -2,7 +2,7 @@ import SocketConnection, { SocketMessage } from '../config/websocket/connector';
 import { BinanceBookTickerStreamData, BinanceWebsocketSubscription } from '../interfaces/interfaces';
 import { Logger } from '../config/logger/logger';
 import { BINANCE_WS } from '../environment';
-import {TradingPairPriceData} from "./symbol-price-data";
+import { TradingPairPriceData } from '../models/symbol-price-data';
 import {MarketAlgorithms} from "../utils/market-algorithms";
 import {MarketPriceListener, SymbolPriceData} from "../listeners/market-price-listener";
 
@@ -52,8 +52,14 @@ export class PriceEvaluator {
 		PriceEvaluator.mapPriceData();
 		const filteredSymbols: TradingPairPriceData[] = PriceEvaluator.filterOutPairs();
 
-		console.log('--------- FILTERED PAIRS ---------');
-		console.log(filteredSymbols);
+		let leaper: TradingPairPriceData | undefined = undefined;
+
+		filteredSymbols.map((symbol: TradingPairPriceData) => {
+			leaper = MarketAlgorithms.findHighestRecentLeaper(symbol, leaper);
+		});
+
+		console.log('Leaper ---------')
+		console.log(leaper);
 	}
 
 	private static mapPriceData(): void {
@@ -65,56 +71,6 @@ export class PriceEvaluator {
 			else this.symbols.push(new TradingPairPriceData(symbol.symbol, Number(symbol.price)));
 		});
 	}
-
-	// private static async evaluateChanges(): Promise<void> {
-	// 	const filteredSymbols: TradingPairPriceData[] = PriceEvaluator.filterOutPairs();
-	// 	const performers: PerformersData = PriceEvaluator.findPerformingPairs(filteredSymbols);
-	//
-	// 	// const climber: TradingPairPriceData | undefined = performers.climber;
-	// 	// const leaper: TradingPairPriceData | undefined = performers.leaper;
-	// 	const highestGainer: TradingPairPriceData | undefined = performers.highestGainer;
-	// 	// const highestGain: number = performers.highestGain;
-	//
-	// 	// let avgGainer: SymbolPriceData | undefined;
-	// 	// let highestAvg: number = 0;
-	//
-	// 	if (highestGainer && highestGain >= 4 && this.deployedTraderBots.length <= 2) await this.setupHighestClimber(highestGainer);
-	// 	if (leaper && leaper.pricePercentageChanges.tenSeconds > 0) await this.setupLeaper(leaper);
-	// 	if (climber) await this.setupClimber(climber);
-	//
-	// 	this.removeFinishedTraderBots();
-	// }
-	//
-	// private static findPerformingPairs(symbols: TradingPairPriceData[]): PerformersData {
-	// 	let climber: TradingPairPriceData | undefined;
-	// 	let leaper: TradingPairPriceData | undefined;
-	// 	let highestGainer: TradingPairPriceData | undefined;
-	// 	// let avgGainer: SymbolPriceData | undefined;
-	// 	let highestGain: number = 0;
-	// 	// let highestAvg: number = 0;
-	//
-	// 	symbols.map((symbol: TradingPairPriceData) => {
-	// 		if (!this.hasClimber) climber = MarketAlgorithms.findBestClimber(symbol, climber);
-	// 		if (!this.hasLeaper) leaper = MarketAlgorithms.findHighestRecentLeaper(symbol, leaper);
-	// 		//
-	// 		if (!this.hasHighestGainer) {
-	// 			const highestGainData: { symbol: SymbolPriceData; highestGain: number } = MarketAlgorithms.findHighestGainer(symbol, highestGain);
-	// 			highestGain = highestGainData.highestGain;
-	// 			highestGainer = highestGainData.symbol;
-	// 		}
-	// 		//
-	// 		// const avgGainData = this.findHighestAverageGainer(symbol, highestAvg);
-	// 		// highestAvg = avgGainData.highestAvg;
-	// 		// avgGainer = avgGainData.symbol;
-	// 	});
-	//
-	// 	return {
-	// 		climber,
-	// 		leaper,
-	// 		highestGainer,
-	// 		highestGain
-	// 	};
-	// }
 
 	private static filterOutPairs(): TradingPairPriceData[] {
 		const allSymbols: TradingPairPriceData[] = PriceEvaluator.symbols;
