@@ -5,6 +5,7 @@ import { BINANCE_WS } from '../environment';
 import { TradingPairPriceData } from '../models/symbol-price-data';
 import {MarketAlgorithms} from "../utils/market-algorithms";
 import {MarketPriceListener, SymbolPriceData} from "../listeners/market-price-listener";
+import {SNSPublish} from "../sns-sqs/publish";
 
 // export interface SymbolPriceData {
 // 	symbol: string;
@@ -60,6 +61,8 @@ export class PriceEvaluator {
 
 		console.log('Leaper ---------')
 		console.log(leaper);
+
+		SNSPublish.send(JSON.stringify(leaper));
 	}
 
 	private static mapPriceData(): void {
