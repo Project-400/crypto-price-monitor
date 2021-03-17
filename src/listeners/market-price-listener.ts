@@ -1,5 +1,5 @@
 import SocketConnection, { SocketMessage } from '../config/websocket/connector';
-import { BinanceBookTickerStreamData, BinanceWebsocketSubscription } from "../interfaces/interfaces";
+import { BinanceBookTickerStreamData, BinanceWebsocketSubscription } from '../interfaces/interfaces';
 import { Logger } from '../config/logger/logger';
 import { BINANCE_WS } from '../environment';
 
@@ -12,11 +12,9 @@ export interface SymbolPriceData {
 
 export class MarketPriceListener {
 
-	private static binanceWsConnection?: SocketConnection;		// Websocket Connection to Binance
-	public static isListening: boolean = false;					// Lowercase version of the symbol, eg. btcusdt
-	private static symbols: SymbolPriceData[] = [];				// The symbol string, eg. BTCUSDT
-	// private static prices: { [s: string]: string } = { };
-	// private static symbols: { [s: string]: SymbolPriceData } = { };
+	private static binanceWsConnection?: SocketConnection;
+	private static isListening: boolean = false;
+	private static symbols: SymbolPriceData[] = [];
 	private static interval: NodeJS.Timeout;
 
 	private static SubscribeToMarketPrices = (): void => {
@@ -53,19 +51,7 @@ export class MarketPriceListener {
 		return symbolPriceData;
 	}
 
-	// private static GetSymbolPriceDataById = (subscriptionId: number): SymbolPriceData | undefined =>
-	// 	MarketPriceListener.symbols.find((s: SymbolPriceData): boolean => s.subscriptionId === subscriptionId)
-	//
-	// private static GetSymbolPriceDataIndex = (symbol: string): number =>
-	// 	MarketPriceListener.symbols.findIndex((s: SymbolPriceData): boolean => s.symbol === symbol)
-
-	// public static GetPrice = (symbol: string): string => MarketPriceListener.GetSymbolPriceData(symbol).price;
-	//
-	// public static GetPriceNumerical = (symbol: string): number => MarketPriceListener.GetSymbolPriceData(symbol).priceNumerical;
-
 	private static UpdatePrice = (symbol: string, price: string): void => {
-		// console.log('Update Price');
-
 		let symbolPriceData: SymbolPriceData | undefined = MarketPriceListener.GetSymbolPriceData(symbol);
 		if (!symbolPriceData) {
 			symbolPriceData = {
@@ -82,10 +68,6 @@ export class MarketPriceListener {
 		symbolPriceData.priceNumerical = Number(price);
 	}
 
-	// private static PriceChange = (symbol: string, price: string): void => {
-	// 	MarketPriceListener.prices[symbol] = price;
-	// }
-
 	public static StartListening = (): void => {
 		Logger.info('Opening Connection to Binance WebSocket');
 
@@ -96,8 +78,6 @@ export class MarketPriceListener {
 			MarketPriceListener.SocketMessage,
 			MarketPriceListener.SocketError
 		);
-
-		// MarketPriceListener.isListening = true;
 	}
 
 	public static StopListening = (): SymbolPriceData[] => {
@@ -114,19 +94,6 @@ export class MarketPriceListener {
 		MarketPriceListener.isListening = true;
 
 		MarketPriceListener.SubscribeToMarketPrices();
-
-		MarketPriceListener.interval = setInterval(async (): Promise<void> => {
-			console.log(`Price Count: ${MarketPriceListener.symbols.length}`);
-			// MarketPriceListener.updatePrices();
-			// this.checks += 1;
-			//
-			// if (!this.inStartup) {
-			// 	await this.evaluateChanges();
-			// } else {
-			// 	if (this.checks >= 6) this.inStartup = false;
-			// 	Logger.info(`Starting up.. Gathering Data for ${60 - (this.checks * 10)} seconds`);
-			// }
-		}, 2000);
 	}
 
 	private static SocketClose = (): void => {
@@ -136,8 +103,6 @@ export class MarketPriceListener {
 
 	private static SocketMessage = (msg: SocketMessage): void => {
 		const msgData: BinanceBookTickerStreamData = JSON.parse(msg.data as string);
-
-		// MarketPriceListener.PriceChange(msgData.s, msgData.a); // TODO: Clarify whether to use msgData.a or msgData.b?
 		if (msgData.result === null && msgData.id !== undefined) return;
 		MarketPriceListener.UpdatePrice(msgData.s, msgData.a); // TODO: Clarify whether to use msgData.a or msgData.b?
 	}
@@ -145,5 +110,7 @@ export class MarketPriceListener {
 	private static SocketError = (): void => {
 		Logger.info(`Trader Bot encountered an error while connected to Binance`);
 	}
+
+	public static GetSymbols = () => MarketPriceListener.symbols;
 
 }
