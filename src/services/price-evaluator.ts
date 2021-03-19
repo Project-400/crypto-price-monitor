@@ -1,25 +1,15 @@
-import SocketConnection, { SocketMessage } from '../config/websocket/connector';
-import { BinanceBookTickerStreamData, BinanceWebsocketSubscription } from '../interfaces/interfaces';
-import { Logger } from '../config/logger/logger';
-import { BINANCE_WS } from '../environment';
 import { TradingPairPriceData } from '../models/symbol-price-data';
-import {MarketAlgorithms} from "../utils/market-algorithms";
-import {MarketPriceListener, SymbolPriceData} from "../listeners/market-price-listener";
-import {SNSPublish} from "../sns-sqs/publish";
+import { MarketAlgorithms } from '../utils/market-algorithms';
+import { MarketPriceListener, SymbolPriceData } from '../listeners/market-price-listener';
+import { SNSPublish } from '../sns-sqs/publish';
+import {CurrencySuggestion} from "@crypto-tracker/common-types";
 
-// export interface SymbolPriceData {
-// 	symbol: string;
-// 	lowercaseSymbol: string;
-// 	price: string;
-// 	priceNumerical: number;
+// interface PerformersData {
+// 	climber?: TradingPairPriceData,
+// 	leaper?: TradingPairPriceData,
+// 	highestGainer?: TradingPairPriceData,
+// 	highestGain: number
 // }
-
-interface PerformersData {
-	climber?: TradingPairPriceData,
-	leaper?: TradingPairPriceData,
-	highestGainer?: TradingPairPriceData,
-	highestGain: number
-}
 
 export class PriceEvaluator {
 
@@ -59,10 +49,17 @@ export class PriceEvaluator {
 			leaper = MarketAlgorithms.findHighestRecentLeaper(symbol, leaper);
 		});
 
-		console.log('Leaper ---------')
-		console.log(leaper);
+		if (leaper) {
+			const currencySuggestion: CurrencySuggestion = {
+				symbol: leaper!.symbol,
+				suggestionTime: new Date().toISOString(),
+				expirationTime: new Date(new Date().getTime() + 30000).toISOString(),
+				percentageIncrease: leaper!.pricePercentageChanges.tenSeconds,
+				timePeriodAnalysis: '10',
+			};
 
-		SNSPublish.send(JSON.stringify(leaper));
+			SNSPublish.send(JSON.stringify(currencySuggestion));
+		}
 	}
 
 	private static mapPriceData(): void {
