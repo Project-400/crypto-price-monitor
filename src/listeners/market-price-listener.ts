@@ -18,7 +18,7 @@ export class MarketPriceListener {
 	private static interval: NodeJS.Timeout;
 
 	private static SubscribeToMarketPrices = (): void => {
-		console.log('Subscribing To Market Prices')
+		console.log('Subscribing To Market Prices');
 
 		const subscriptionId: number = new Date().getMilliseconds();
 
@@ -32,7 +32,7 @@ export class MarketPriceListener {
 	}
 
 	private static UnsubscribeFromMarketPrices = (): void => {
-		console.log('Unsubscribing To Market Prices')
+		console.log('Unsubscribing To Market Prices');
 
 		const subscriptionId: number = new Date().getMilliseconds();
 
@@ -46,7 +46,7 @@ export class MarketPriceListener {
 	}
 
 	private static GetSymbolPriceData = (symbol: string): SymbolPriceData | undefined => {
-		let symbolPriceData: SymbolPriceData | undefined =
+		const symbolPriceData: SymbolPriceData | undefined =
 			MarketPriceListener.symbols.find((s: SymbolPriceData): boolean => s.symbol === symbol);
 		return symbolPriceData;
 	}
@@ -111,6 +111,6 @@ export class MarketPriceListener {
 		Logger.info(`Trader Bot encountered an error while connected to Binance`);
 	}
 
-	public static GetSymbols = () => MarketPriceListener.symbols;
+	public static GetSymbols = (): SymbolPriceData[] => MarketPriceListener.symbols;
 
 }
