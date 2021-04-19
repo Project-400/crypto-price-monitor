@@ -2,7 +2,8 @@ import logger from 'morgan';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import indexRouter from './routes';
-import { WebsocketProducer } from './config/websocket/producer';
+import { MarketPriceListener } from './listeners/market-price-listener';
+import { PriceEvaluator } from './services/price-evaluator';
 
 const app: express.Application = express();
 
@@ -12,10 +13,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/v1', indexRouter);
 
-WebsocketProducer.setup(app);
+MarketPriceListener.StartListening();
+PriceEvaluator.Start();
 
-app.listen(3001, '0.0.0.0', (): void => {
-	console.log('Listening to port: ' + 3000);
+app.listen(3011, '0.0.0.0', (): void => {
+	console.log('Listening to port: ' + 3010);
 });
 
 export default app;
