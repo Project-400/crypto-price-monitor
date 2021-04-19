@@ -69,8 +69,8 @@ export class PriceEvaluator {
 
 		return allSymbols.filter((s: TradingPairPriceData): boolean =>  // TODO: Get this and store from Lambda
 			!PriceEvaluator.isLeveraged(s.symbol) &&
-			!PriceEvaluator.isTinyCurrency(s.symbol, s.prices.now - s.prices.sixtySeconds); // &&
-			// PriceEvaluator.allowedQuotes(s.symbol)); // &&
+			!PriceEvaluator.isTinyCurrency(s.symbol, s.prices.now - s.prices.sixtySeconds) &&
+			PriceEvaluator.allowedQuotes(s.symbol)); // &&
 			// !this.isIgnoredPair(s.symbol) &&
 			// this.isAllowedQuote(s.symbol));
 	}
