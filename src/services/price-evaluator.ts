@@ -3,6 +3,9 @@ import { MarketAlgorithms } from '../utils/market-algorithms';
 import { MarketPriceListener, SymbolPriceData } from '../listeners/market-price-listener';
 import { SNSPublish } from '../sns-sqs/publish';
 import { CurrencySuggestion } from '@crypto-tracker/common-types';
+import {WebsocketProducer} from "../config/websocket/producer";
+import {ClientPriceSubscriptions} from "./client-price-subscriptions";
+import {PriceAlerts} from "./price-alerts";
 
 export class PriceEvaluator {
 
@@ -40,6 +43,8 @@ export class PriceEvaluator {
 			leaper = MarketAlgorithms.findHighestRecentLeaper(symbol, leaper);
 		});
 
+		console.log(leaper);
+
 		if (leaper && leaper.pricePercentageChanges.tenSeconds > 0) {
 			const currencySuggestion: CurrencySuggestion = {
 				symbol: leaper.symbol,
@@ -50,6 +55,16 @@ export class PriceEvaluator {
 			};
 
 			SNSPublish.send(JSON.stringify(currencySuggestion));
+		}
+
+		if (leaper && leaper.pricePercentageChanges.sixtySeconds > 2) {
+			console.log('SENDING Price Alert');
+			PriceAlerts.AddAlert({
+				symbol: leaper.symbol,
+				price: leaper.prices.sixtySeconds,
+				percentageDifference: leaper.pricePercentageChanges.sixtySeconds,
+				time: new Date().toISOString()
+			});
 		}
 	}
 

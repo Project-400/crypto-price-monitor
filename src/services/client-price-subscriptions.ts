@@ -1,6 +1,6 @@
 export class ClientPriceSubscriptions {
 
-	private static subscribers: string[] = [];
+	public static subscribers: string[] = [];
 
 	public static AddSub = (socketId: string): void => {
 		console.log('Adding Price Subscriber');
